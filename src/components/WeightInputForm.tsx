@@ -25,7 +25,7 @@ export default function WeightInputForm() {
           type="submit"
           className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700"
         >
-          記録する.
+          記録する
         </button>
       </form>
     );
