@@ -1,51 +1,20 @@
-"use client"; // ← Next.js でクライアントサイドのコンポーネントに必須
+"use client";
 
 import { useState } from "react";
+import BalanceDisplay from "@/components/BalanceDisplay";
+import WeightInputForm from "@/components/WeightInputForm";
 
-export default function WeightInputForm() {
-  const [weight, setWeight] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch("/api/weight", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ weight }), // 入力値を API仕様通り送信
-      });
-
-      const data = await response.json(); // レスポンスを JSON として取得
-      console.log("APIレスポンス:", data);
-    } catch (error) {
-      console.error("API送信エラー:", error);
-    }
-  };
+export default function Page() {
+  // 残高を保持する state
+  const [balance, setBalance] = useState<number | null>(null);
 
   return (
-    <form className="p-4 bg-gray-50 shadow rounded-lg" onSubmit={handleSubmit}>
-      <label htmlFor="weight" className="block text-gray-700 mb-2">
-        今日の体重を入力してください
-      </label>
+    <div className="p-4">
+      {/* BalanceDisplay に残高を渡す */}
+      <BalanceDisplay balance={balance} />
 
-      <input
-        id="weight"
-        type="number"
-        step="0.1"
-        placeholder="例: 75.5"
-        value={weight}
-        onChange={(e) => setWeight(e.target.value)}
-        className="w-full border border-gray-300 rounded p-2 mb-4"
-      />
-
-      <button
-        type="submit"
-        className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700"
-      >
-        記録する
-      </button>
-    </form>
+      {/* WeightInputForm に setBalance を渡す */}
+      <WeightInputForm setBalance={setBalance} />
+    </div>
   );
 }
