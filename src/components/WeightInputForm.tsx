@@ -2,61 +2,66 @@
 
 import { useState } from "react";
 
-type WeightInputFormProps = {
-  setBalance: (value: number) => void; // 親の state 更新関数
-};
-
-export default function WeightInputForm({ setBalance }: WeightInputFormProps) {
+export default function WeightInputForm() {
   const [weight, setWeight] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const numericWeight = Number(weight);
-    if (!weight || isNaN(numericWeight)) {
-      alert("体重を正しく入力してください");
-      return;
-    }
+    setErrorMessage(""); // 前のエラーをリセット
+    setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/weight", {
+      const response = await fetch("/api/weight", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weight: numericWeight }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ weight }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        alert(err.error || "送信に失敗しました");
-        return;
+      if (!response.ok) {
+        throw new Error("API通信に失敗しました");
       }
 
-      const data = await res.json();
-      console.log("API Response:", data);
+      const data = await response.json();
+      console.log("API 成功:", data);
 
-      // balance が取得できれば state を更新
-      if (data.balanceInfo?.balances?.[0]?.balance) {
-        setBalance(Number(data.balanceInfo.balances[0].balance));
-      }
-
-      // 入力フォームをリセット
-      setWeight("");
+      setWeight(""); // 入力欄をリセット
     } catch (error) {
-      console.error("API 呼び出し中にエラーが発生:", error);
+      console.error("API 呼び出しエラー:", error);
+      setErrorMessage("エラーが発生しました。もう一度お試しください。");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <input
-        type="text"
+        type="number"
+        step="0.1"
+        placeholder="体重を入力"
         value={weight}
         onChange={(e) => setWeight(e.target.value)}
-        placeholder="今日の体重"
-        className="border p-2 rounded mr-2"
+        className="border p-2 rounded w-full"
+        disabled={isSubmitting}
       />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        送信
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className={`px-4 py-2 rounded text-white ${
+          isSubmitting ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+        }`}
+      >
+        {isSubmitting ? "記録中..." : "記録する"}
       </button>
+
+      {/* エラーメッセージ表示 */}
+      {errorMessage && (
+        <p className="text-red-500 font-medium">{errorMessage}</p>
+      )}
     </form>
   );
 }
