@@ -1,4 +1,4 @@
-"use client";  // ← Next.js でクライアントサイドのコンポーネントに必須
+"use client"; // ← Next.js でクライアントサイドのコンポーネントに必須
 
 import { useState } from "react";
 
@@ -25,10 +25,7 @@ export default function WeightInputForm() {
   };
 
   return (
-    <form
-      className="p-4 bg-gray-50 shadow rounded-lg"
-      onSubmit={handleSubmit}
-    >
+    <form className="p-4 bg-gray-50 shadow rounded-lg" onSubmit={handleSubmit}>
       <label htmlFor="weight" className="block text-gray-700 mb-2">
         今日の体重を入力してください
       </label>
@@ -52,5 +49,3 @@ export default function WeightInputForm() {
     </form>
   );
 }
-
-  
