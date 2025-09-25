@@ -1,3 +1,4 @@
+// app/api/weight/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // 共有化したprismaをインポート
 
