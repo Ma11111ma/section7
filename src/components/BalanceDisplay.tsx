@@ -1,14 +1,15 @@
-// BalanceDisplay.tsx
-// 現在の残高を表示するコンポーネント
-// API で取得する予定だが、ここでは固定値を表示する（例: 100,000 円）
+type BalanceDisplayProps = {
+  balance: number | null; // 親コンポーネントから受け取る
+};
 
-export default function BalanceDisplay() {
-    return (
-      <div className="p-4 bg-white shadow rounded-lg text-center">
-        {/* 固定の残高表示 */}
-        <p className="text-gray-700 text-lg">現在の残高:</p>
-        <p className="text-2xl font-bold text-green-600">100,000 円</p>
-      </div>
-    );
-  }
-  
+export default function BalanceDisplay({ balance }: BalanceDisplayProps) {
+  return (
+    <div className="p-4 bg-gray-100 rounded shadow">
+      <h2 className="text-lg font-semibold">現在の残高</h2>
+      {/* balance が null なら「読み込み中」と表示 */}
+      <p className="text-2xl font-bold">
+        {balance !== null ? `${balance.toLocaleString()} 円` : "読み込み中..."}
+      </p>
+    </div>
+  );
+}
