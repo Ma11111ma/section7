@@ -49,7 +49,12 @@ export async function POST(request: Request) {
 
     //フロントに返すデータを整形
     const responseData = {
-      saveWeight: newWeightLog,
+      // newWeightLogをそのまま返すのではなく、一度分解して
+      saveWeight: {
+        ...newWeightLog, // id や createdAt はそのまま使い、
+        // weightプロパティだけをDecimalからnumberに変換して上書きします
+        weight: newWeightLog.weight.toNumber(),
+      },
       balanceInfo: gmoResponse,
     };
 
