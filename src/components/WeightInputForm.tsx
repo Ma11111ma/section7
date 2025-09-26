@@ -1,8 +1,28 @@
 "use client";
 
 import { useState } from "react";
+// 親から受け取るPropsの型を定義
+type Props = {
+  currentWeight: number; // 現在の体重を受け取る
+  setCurrentWeight: (weight: number) => void;
+  initialBalance: number;
+  setBalance: (balance: number) => void;
+  // 差額と画像を更新するための関数を受け取る
+  setWeightDiff: (diff: number | null) => void;
+  setBalanceDiff: (diff: number | null) => void;
+  setCharacterImage: (src: string) => void;
+};
 
-export default function WeightInputForm() {
+//Propsとして受け取り
+export default function WeightInputForm({
+  currentWeight,
+  setCurrentWeight,
+  initialBalance,
+  setBalance,
+  setWeightDiff,
+  setBalanceDiff,
+  setCharacterImage,
+}: Props) {
   const [weight, setWeight] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,10 +32,12 @@ export default function WeightInputForm() {
     setIsSubmitting(true);
     setError(null);
 
-    try {
-      // 入力値の確認
-      console.log("入力値:", weight, "Number:", Number(weight));
+    // stateをリセット
+    setWeightDiff(null);
+    setBalanceDiff(null);
+    setCharacterImage("/images/normal.png");
 
+    try {
       // 64以下なら音を鳴らす
       if (Number(weight) <= 64 && weight !== "") {
         console.log("チャリーン再生");
@@ -27,7 +49,7 @@ export default function WeightInputForm() {
       const response = await fetch("/api/weight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ weight }),
+        body: JSON.stringify({ weight: parseFloat(weight) }),
       });
 
       if (!response.ok) {
@@ -35,12 +57,33 @@ export default function WeightInputForm() {
       }
 
       const data = await response.json();
-      console.log("API Response:", data);
+      const newWeight = data.saveWeight.weight;
+      const newBalanceString = data.balanceInfo?.balances[0]?.balance;
 
-      // 成功したら入力欄をリセット
-      setWeight("");
+      // 体重の差額を計算して更新
+      const weightDifference = newWeight - currentWeight;
+      setWeightDiff(weightDifference);
+      setCurrentWeight(newWeight);
+      // 残高の差額を計算して更新
+      if (newBalanceString) {
+        const newBalance = parseInt(newBalanceString, 10);
+        const balanceDifference = newBalance - initialBalance;
+        setBalanceDiff(balanceDifference);
+        setBalance(newBalance);
+      }
+
+      // 体重が減ったらキャラクターを喜ばせる
+      if (weightDifference < 0) {
+        setCharacterImage("/images/happy.png");
+      }
+
+      setWeight(""); // フォームをクリア
     } catch (err) {
-      setError("エラーが発生しました。もう一度お試しください。");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("予期せぬエラーが発生しました。");
+      }
     } finally {
       setIsSubmitting(false);
     }
